@@ -1,7 +1,7 @@
+import math
 import streamlit as st
 import numpy as np
 import pandas as pd
-from scipy.stats import poisson
 
 st.set_page_config(page_title="Analytics Calcio", page_icon="⚽", layout="wide")
 
@@ -15,10 +15,13 @@ squadra_ospite = st.sidebar.text_input("Squadra Ospite", "Milan")
 media_casa = st.sidebar.number_input(f"Media Gol {squadra_casa}", min_value=0.1, value=1.85, step=0.05)
 media_ospite = st.sidebar.number_input(f"Media Gol {squadra_ospite}", min_value=0.1, value=1.15, step=0.05)
 
+def poisson_pmf(k, mu):
+    return (mu**k * math.exp(-mu)) / math.factorial(k)
+
 matrice = np.zeros((6, 6))
 for i in range(6):
     for j in range(6):
-        matrice[i, j] = poisson.pmf(i, media_casa) * poisson.pmf(j, media_ospite)
+        matrice[i, j] = poisson_pmf(i, media_casa) * poisson_pmf(j, media_ospite)
 
 prob_1 = float(np.sum(np.tril(matrice, -1)))
 prob_x = float(np.sum(np.diag(matrice)))
