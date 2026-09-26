@@ -3,7 +3,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
-st.set_page_config(page_title="Analytics Calcio & Betting", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Analytics Calcio & Betting Pro", page_icon="⚽", layout="wide")
 
 st.title("⚽ Calcolatore Probabilità & Betting (Club & Nazionali)")
 st.markdown("Analisi completa delle probabilità e Fair Quote per i principali mercati di scommessa.")
@@ -15,29 +15,30 @@ CAMPIONATI = {
     "🇩🇪 Bundesliga (Germania)": ("club", "D1"),
     "🇫🇷 Ligue 1 (Francia)": ("club", "F1"),
     "🇳🇱 Eredivisie (Olanda)": ("club", "N1"),
-    "🌍 Nazionali (Amichevoli / Qualificazioni)": ("nations", "NAT")
+    "🌍 Nazionali (Amichevoli / Qualificazioni / Tornei)": ("nations", "NAT")
 }
 
 st.sidebar.header("⚙️ Selezione Categoria")
 campionato_scelto = st.sidebar.selectbox("Scegli Campionato", list(CAMPIONATI.keys()))
 tipo_comp, codice_league = CAMPIONATI[campionato_scelto]
 
+# Rating Nazionali (Rating Forza, Gol Fatti Medi, Gol Subiti Medi)
 DATI_NAZIONALI = {
-    "Italia": (1.65, 1.25),
-    "Francia": (2.10, 1.50),
-    "Germania": (2.00, 1.40),
-    "Inghilterra": (2.05, 1.45),
-    "Spagna": (2.15, 1.55),
-    "Portogallo": (1.90, 1.35),
-    "Argentina": (1.85, 1.30),
-    "Brasile": (2.10, 1.45),
-    "Olanda": (1.95, 1.40),
-    "Belgio": (1.80, 1.30),
-    "Croazia": (1.50, 1.20),
-    "Svizzera": (1.45, 1.15),
-    "Uruguay": (1.55, 1.20),
-    "Colombia": (1.50, 1.10),
-    "Giappone": (1.60, 1.25)
+    "Francia": {"rating": 92, "att": 2.2, "def": 0.8},
+    "Inghilterra": {"rating": 90, "att": 2.1, "def": 0.8},
+    "Spagna": {"rating": 90, "att": 2.1, "def": 0.9},
+    "Argentina": {"rating": 89, "att": 1.9, "def": 0.7},
+    "Brasile": {"rating": 88, "att": 2.0, "def": 0.9},
+    "Germania": {"rating": 87, "att": 2.0, "def": 1.1},
+    "Portogallo": {"rating": 87, "att": 1.9, "def": 0.9},
+    "Olanda": {"rating": 85, "att": 1.9, "def": 1.1},
+    "Italia": {"rating": 84, "att": 1.5, "def": 0.9},
+    "Belgio": {"rating": 83, "att": 1.7, "def": 1.1},
+    "Croazia": {"rating": 82, "att": 1.4, "def": 1.0},
+    "Uruguay": {"rating": 82, "att": 1.5, "def": 1.0},
+    "Svizzera": {"rating": 80, "att": 1.4, "def": 1.1},
+    "Giappone": {"rating": 79, "att": 1.6, "def": 1.2},
+    "Colombia": {"rating": 81, "att": 1.5, "def": 1.0}
 }
 
 @st.cache_data(ttl=3600)
@@ -75,14 +76,20 @@ if tipo_comp == "club":
 else:
     squadre = sorted(list(DATI_NAZIONALI.keys()))
     st.sidebar.header("🌍 Selezione Nazionali")
-    s_casa = st.sidebar.selectbox("Nazionale Casa", squadre, index=0)
+    s_casa = st.sidebar.selectbox("Nazionale Casa / Designata", squadre, index=0)
     s_ospite = st.sidebar.selectbox("Nazionale Trasferta", squadre, index=1)
     
-    mc_casa, mt_casa = DATI_NAZIONALI.get(s_casa, (1.5, 1.2))
-    mc_ospite, mt_ospite = DATI_NAZIONALI.get(s_ospite, (1.5, 1.2))
+    campo_neutro = st.sidebar.checkbox("Campo Neutro (es. Fase Finale)", value=False)
     
-    lambda_casa = max(0.2, (mc_casa + mt_casa) / 2.0 * 1.1)
-    lambda_ospite = max(0.2, (mc_ospite + mt_ospite) / 2.0 * 0.9)
+    d_casa = DATI_NAZIONALI[s_casa]
+    d_ospite = DATI_NAZIONALI[s_ospite]
+    
+    # Calcolo basato sul rating di forza relativo
+    diff_rating = d_casa["rating"] - d_ospite["rating"]
+    bonus_campo = 0.25 if not campo_neutro else 0.0
+    
+    lambda_casa = max(0.2, (d_casa["att"] + d_ospite["def"]) / 2.0 + (diff_rating * 0.03) + bonus_campo)
+    lambda_ospite = max(0.2, (d_ospite["att"] + d_casa["def"]) / 2.0 - (diff_rating * 0.03))
 
 st.sidebar.divider()
 st.sidebar.subheader("📈 Medie Gol Stimate")
