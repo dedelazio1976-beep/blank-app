@@ -5,40 +5,126 @@ import pandas as pd
 
 st.set_page_config(page_title="Analytics Calcio & Betting Pro", page_icon="⚽", layout="wide")
 
-st.title("⚽ Calcolatore Probabilità & Betting (Club & Nazionali)")
-st.markdown("Analisi completa delle probabilità e Fair Quote per i principali mercati di scommessa.")
+st.title("⚽ Calcolatore Probabilità & Betting Pro")
+st.markdown("Analisi completa delle probabilità e Fair Quote per Campionati, Coppe Europee e Nazionali.")
 
 CAMPIONATI = {
+    "🏆 UEFA Champions League": ("coppe", "CL"),
+    "🇪🇺 UEFA Europa League": ("coppe", "EL"),
     "🇮🇹 Serie A (Italia)": ("club", "I1"),
+    "🇮🇹 Serie B (Italia)": ("club", "I2"),
+    "🌍 UEFA Nations League": ("nations", "NL"),
     "🇬🇧 Premier League (Inghilterra)": ("club", "E0"),
     "🇪🇸 La Liga (Spagna)": ("club", "SP1"),
     "🇩🇪 Bundesliga (Germania)": ("club", "D1"),
     "🇫🇷 Ligue 1 (Francia)": ("club", "F1"),
-    "🇳🇱 Eredivisie (Olanda)": ("club", "N1"),
-    "🌍 Nazionali (Amichevoli / Qualificazioni / Tornei)": ("nations", "NAT")
+    "🇳🇱 Eredivisie (Olanda)": ("club", "N1")
 }
 
 st.sidebar.header("⚙️ Selezione Categoria")
-campionato_scelto = st.sidebar.selectbox("Scegli Campionato", list(CAMPIONATI.keys()))
+campionato_scelto = st.sidebar.selectbox("Scegli Competizione", list(CAMPIONATI.keys()))
 tipo_comp, codice_league = CAMPIONATI[campionato_scelto]
 
-# Rating Nazionali (Rating Forza, Gol Fatti Medi, Gol Subiti Medi)
+# Database Coppe Europee (Champions & Europa League)
+DATI_COPPE = {
+    # Top Champions League
+    "Real Madrid": {"rating": 94, "att": 2.3, "def": 0.8},
+    "Manchester City": {"rating": 94, "att": 2.4, "def": 0.8},
+    "Bayern Monaco": {"rating": 91, "att": 2.2, "def": 0.9},
+    "PSG": {"rating": 90, "att": 2.1, "def": 0.9},
+    "Arsenal": {"rating": 89, "att": 2.0, "def": 0.8},
+    "Inter": {"rating": 89, "att": 1.9, "def": 0.8},
+    "Barcelona": {"rating": 88, "att": 2.1, "def": 1.0},
+    "Liverpool": {"rating": 90, "att": 2.2, "def": 0.9},
+    "Atletico Madrid": {"rating": 86, "att": 1.6, "def": 0.9},
+    "Juventus": {"rating": 85, "att": 1.6, "def": 0.9},
+    "Bayer Leverkusen": {"rating": 88, "att": 2.1, "def": 0.9},
+    "Borussia Dortmund": {"rating": 86, "att": 1.8, "def": 1.1},
+    "Atalanta": {"rating": 85, "att": 1.9, "def": 1.1},
+    "AC Milan": {"rating": 84, "att": 1.6, "def": 1.1},
+    "Benfica": {"rating": 83, "att": 1.7, "def": 1.0},
+    "Sporting CP": {"rating": 84, "att": 1.9, "def": 1.0},
+    "PSV Eindhoven": {"rating": 82, "att": 1.8, "def": 1.1},
+    "RB Leipzig": {"rating": 84, "att": 1.8, "def": 1.1},
+    "Aston Villa": {"rating": 83, "att": 1.7, "def": 1.1},
+    "Lille": {"rating": 80, "att": 1.4, "def": 1.0},
+    "Monaco": {"rating": 81, "att": 1.6, "def": 1.1},
+    "Celtic": {"rating": 77, "att": 1.4, "def": 1.3},
+    "Feyenoord": {"rating": 80, "att": 1.5, "def": 1.1},
+    "Club Brugge": {"rating": 77, "att": 1.3, "def": 1.2},
+    "Shakhtar Donetsk": {"rating": 76, "att": 1.2, "def": 1.3},
+    "Red Star Belgrade": {"rating": 74, "att": 1.1, "def": 1.5},
+    "Sparta Praga": {"rating": 75, "att": 1.2, "def": 1.3},
+    "Sturm Graz": {"rating": 73, "att": 1.0, "def": 1.4},
+    "Slovan Bratislava": {"rating": 70, "att": 0.8, "def": 1.7},
+
+    # Europa League principali
+    "Manchester United": {"rating": 85, "att": 1.7, "def": 1.1},
+    "Tottenham": {"rating": 86, "att": 1.9, "def": 1.1},
+    "AS Roma": {"rating": 83, "att": 1.5, "def": 1.0},
+    "Lazio": {"rating": 82, "att": 1.5, "def": 1.0},
+    "Athletic Bilbao": {"rating": 83, "att": 1.5, "def": 0.9},
+    "Real Sociedad": {"rating": 82, "att": 1.4, "def": 0.9},
+    "Eintracht Francoforte": {"rating": 82, "att": 1.6, "def": 1.2},
+    "Ajax": {"rating": 80, "att": 1.5, "def": 1.2},
+    "Porto": {"rating": 83, "att": 1.6, "def": 0.9},
+    "Galatasaray": {"rating": 81, "att": 1.7, "def": 1.2},
+    "Fenerbahce": {"rating": 81, "att": 1.6, "def": 1.1},
+    "Olympiakos": {"rating": 78, "att": 1.3, "def": 1.1},
+    "Slavia Praga": {"rating": 77, "att": 1.3, "def": 1.1},
+    "AZ Alkmaar": {"rating": 78, "att": 1.4, "def": 1.1},
+    "Nizza": {"rating": 79, "att": 1.3, "def": 1.0},
+    "Anderlecht": {"rating": 76, "att": 1.2, "def": 1.2},
+    "Besiktas": {"rating": 78, "att": 1.4, "def": 1.3},
+    "Rangers": {"rating": 77, "att": 1.3, "def": 1.2},
+    "PAOK": {"rating": 76, "att": 1.3, "def": 1.2},
+    "Maccabi Tel Aviv": {"rating": 73, "att": 1.1, "def": 1.4},
+    "Dynamo Kyiv": {"rating": 74, "att": 1.1, "def": 1.3},
+    "Malmo FF": {"rating": 73, "att": 1.1, "def": 1.3},
+    "Bodø/Glimt": {"rating": 75, "att": 1.4, "def": 1.3},
+    "Union Saint-Gilloise": {"rating": 76, "att": 1.3, "def": 1.1},
+    "FC Midtjylland": {"rating": 74, "att": 1.2, "def": 1.2},
+    "Ferencvaros": {"rating": 72, "att": 1.1, "def": 1.3},
+    "Twente": {"rating": 77, "att": 1.3, "def": 1.1},
+    "Qarabag": {"rating": 73, "att": 1.1, "def": 1.3},
+    "Elfsborg": {"rating": 71, "att": 1.0, "def": 1.4},
+    "Ludogorets": {"rating": 71, "att": 1.0, "def": 1.4},
+    "FCSB": {"rating": 71, "att": 1.0, "def": 1.4},
+    "RFS": {"rating": 66, "att": 0.7, "def": 1.7}
+}
+
+# Database Nazionali
 DATI_NAZIONALI = {
     "Francia": {"rating": 92, "att": 2.2, "def": 0.8},
+    "Spagna": {"rating": 91, "att": 2.1, "def": 0.8},
     "Inghilterra": {"rating": 90, "att": 2.1, "def": 0.8},
-    "Spagna": {"rating": 90, "att": 2.1, "def": 0.9},
-    "Argentina": {"rating": 89, "att": 1.9, "def": 0.7},
-    "Brasile": {"rating": 88, "att": 2.0, "def": 0.9},
-    "Germania": {"rating": 87, "att": 2.0, "def": 1.1},
-    "Portogallo": {"rating": 87, "att": 1.9, "def": 0.9},
-    "Olanda": {"rating": 85, "att": 1.9, "def": 1.1},
-    "Italia": {"rating": 84, "att": 1.5, "def": 0.9},
-    "Belgio": {"rating": 83, "att": 1.7, "def": 1.1},
-    "Croazia": {"rating": 82, "att": 1.4, "def": 1.0},
-    "Uruguay": {"rating": 82, "att": 1.5, "def": 1.0},
-    "Svizzera": {"rating": 80, "att": 1.4, "def": 1.1},
-    "Giappone": {"rating": 79, "att": 1.6, "def": 1.2},
-    "Colombia": {"rating": 81, "att": 1.5, "def": 1.0}
+    "Germania": {"rating": 88, "att": 2.0, "def": 1.0},
+    "Portugal": {"rating": 88, "att": 2.0, "def": 0.9},
+    "Olanda": {"rating": 86, "att": 1.9, "def": 1.1},
+    "Italia": {"rating": 85, "att": 1.6, "def": 0.9},
+    "Belgio": {"rating": 84, "att": 1.7, "def": 1.1},
+    "Croazia": {"rating": 83, "att": 1.4, "def": 1.0},
+    "Svizzera": {"rating": 81, "att": 1.4, "def": 1.1},
+    "Danimarca": {"rating": 81, "att": 1.5, "def": 1.0},
+    "Serbia": {"rating": 78, "att": 1.3, "def": 1.3},
+    "Ungheria": {"rating": 77, "att": 1.2, "def": 1.2},
+    "Polonia": {"rating": 77, "att": 1.3, "def": 1.4},
+    "Scozia": {"rating": 76, "att": 1.1, "def": 1.3},
+    "Ucraina": {"rating": 78, "att": 1.4, "def": 1.2},
+    "Austria": {"rating": 80, "att": 1.6, "def": 1.1},
+    "Turchia": {"rating": 79, "att": 1.6, "def": 1.2},
+    "Norvegia": {"rating": 79, "att": 1.7, "def": 1.3},
+    "Svezia": {"rating": 77, "att": 1.6, "def": 1.2},
+    "Repubblica Ceca": {"rating": 77, "att": 1.4, "def": 1.3},
+    "Grecia": {"rating": 76, "att": 1.3, "def": 1.0},
+    "Romania": {"rating": 75, "att": 1.4, "def": 1.1},
+    "Slovacchia": {"rating": 75, "att": 1.3, "def": 1.1},
+    "Georgia": {"rating": 75, "att": 1.4, "def": 1.3},
+    "Albania": {"rating": 74, "att": 1.1, "def": 1.1},
+    "Slovenia": {"rating": 75, "att": 1.2, "def": 1.1},
+    "Irlanda": {"rating": 73, "att": 1.0, "def": 1.3},
+    "Finlandia": {"rating": 72, "att": 1.0, "def": 1.4},
+    "Islanda": {"rating": 72, "att": 1.2, "def": 1.5}
 }
 
 @st.cache_data(ttl=3600)
@@ -71,25 +157,42 @@ if tipo_comp == "club":
         def_casa = medie_casa.get(s_casa, media_gen_casa) / media_gen_casa
         lambda_ospite = max(0.2, att_ospite * def_casa * media_gen_trasferta)
     else:
-        st.error("Errore nel caricamento dei dati.")
+        st.error("Errore nel caricamento dei dati del campionato.")
         st.stop()
+
+elif tipo_comp == "coppe":
+    squadre = sorted(list(DATI_COPPE.keys()))
+    st.sidebar.header("🏆 Coppe Europee - Partita")
+    s_casa = st.sidebar.selectbox("Squadra in Casa", squadre, index=squadre.index("Real Madrid") if "Real Madrid" in squadre else 0)
+    s_ospite = st.sidebar.selectbox("Squadra in Trasferta", squadre, index=squadre.index("Inter") if "Inter" in squadre else 1)
+    
+    campo_neutro = st.sidebar.checkbox("Campo Neutro (es. Finale)", value=False)
+    
+    d_casa = DATI_COPPE[s_casa]
+    d_ospite = DATI_COPPE[s_ospite]
+    
+    diff_rating = d_casa["rating"] - d_ospite["rating"]
+    bonus_campo = 0.25 if not campo_neutro else 0.0
+    
+    lambda_casa = max(0.2, (d_casa["att"] + d_ospite["def"]) / 2.0 + (diff_rating * 0.025) + bonus_campo)
+    lambda_ospite = max(0.2, (d_ospite["att"] + d_casa["def"]) / 2.0 - (diff_rating * 0.025))
+
 else:
     squadre = sorted(list(DATI_NAZIONALI.keys()))
-    st.sidebar.header("🌍 Selezione Nazionali")
-    s_casa = st.sidebar.selectbox("Nazionale Casa / Designata", squadre, index=0)
-    s_ospite = st.sidebar.selectbox("Nazionale Trasferta", squadre, index=1)
+    st.sidebar.header("🌍 Nations League - Partita")
+    s_casa = st.sidebar.selectbox("Nazionale in Casa", squadre, index=squadre.index("Italia") if "Italia" in squadre else 0)
+    s_ospite = st.sidebar.selectbox("Nazionale in Trasferta", squadre, index=squadre.index("Francia") if "Francia" in squadre else 1)
     
-    campo_neutro = st.sidebar.checkbox("Campo Neutro (es. Fase Finale)", value=False)
+    campo_neutro = st.sidebar.checkbox("Campo Neutro / Fase Finale", value=False)
     
     d_casa = DATI_NAZIONALI[s_casa]
     d_ospite = DATI_NAZIONALI[s_ospite]
     
-    # Calcolo basato sul rating di forza relativo
     diff_rating = d_casa["rating"] - d_ospite["rating"]
-    bonus_campo = 0.25 if not campo_neutro else 0.0
+    bonus_campo = 0.22 if not campo_neutro else 0.0
     
-    lambda_casa = max(0.2, (d_casa["att"] + d_ospite["def"]) / 2.0 + (diff_rating * 0.03) + bonus_campo)
-    lambda_ospite = max(0.2, (d_ospite["att"] + d_casa["def"]) / 2.0 - (diff_rating * 0.03))
+    lambda_casa = max(0.2, (d_casa["att"] + d_ospite["def"]) / 2.0 + (diff_rating * 0.025) + bonus_campo)
+    lambda_ospite = max(0.2, (d_ospite["att"] + d_casa["def"]) / 2.0 - (diff_rating * 0.025))
 
 st.sidebar.divider()
 st.sidebar.subheader("📈 Medie Gol Stimate")
