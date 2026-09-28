@@ -9,12 +9,12 @@ st.title("⚽ Calcolatore Probabilità & Betting Pro")
 st.markdown("Analisi completa delle probabilità e Fair Quote per Campionati, Coppe Europee e Nazionali.")
 
 CAMPIONATI = {
-    "🌍 Coppa d'Africa (AFCON)": ("afcon", "AFCON"),
+    "🌍 UEFA Nations League": ("nations", "NL"),
     "🏆 UEFA Champions League": ("coppe", "CL"),
     "🇪🇺 UEFA Europa League": ("coppe", "EL"),
+    "🌍 Coppa d'Africa (AFCON)": ("afcon", "AFCON"),
     "🇮🇹 Serie A (Italia)": ("club", "I1"),
     "🇮🇹 Serie B (Italia)": ("club", "I2"),
-    "🌍 UEFA Nations League": ("nations", "NL"),
     "🇬🇧 Premier League (Inghilterra)": ("club", "E0"),
     "🇪🇸 La Liga (Spagna)": ("club", "SP1"),
     "🇩🇪 Bundesliga (Germania)": ("club", "D1"),
@@ -26,35 +26,65 @@ st.sidebar.header("⚙️ Selezione Categoria")
 campionato_scelto = st.sidebar.selectbox("Scegli Competizione", list(CAMPIONATI.keys()))
 tipo_comp, codice_league = CAMPIONATI[campionato_scelto]
 
-# Database Coppa d'Africa (AFCON)
-DATI_AFCON = {
-    "Costa d'Avorio": {"rating": 84, "att": 1.6, "def": 0.9},
-    "Nigeria": {"rating": 85, "att": 1.8, "def": 1.0},
-    "Marocco": {"rating": 87, "att": 1.9, "def": 0.7},
-    "Senegal": {"rating": 86, "att": 1.8, "def": 0.8},
-    "Egitto": {"rating": 83, "att": 1.5, "def": 0.9},
-    "Algeria": {"rating": 82, "att": 1.6, "def": 1.0},
-    "Camerun": {"rating": 81, "att": 1.4, "def": 1.0},
-    "Ghana": {"rating": 78, "att": 1.3, "def": 1.2},
-    "Mali": {"rating": 79, "att": 1.3, "def": 0.9},
-    "Sudafrica": {"rating": 77, "att": 1.2, "def": 1.0},
-    "Tunisia": {"rating": 79, "att": 1.2, "def": 0.9},
-    "RD del Congo": {"rating": 77, "att": 1.2, "def": 1.1},
-    "Burkina Faso": {"rating": 76, "att": 1.2, "def": 1.1},
-    "Guinea": {"rating": 76, "att": 1.2, "def": 1.1},
-    "Capo Verde": {"rating": 75, "att": 1.1, "def": 1.0},
-    "Angola": {"rating": 74, "att": 1.1, "def": 1.1},
-    "Zambia": {"rating": 73, "att": 1.0, "def": 1.3},
-    "Mauritania": {"rating": 70, "att": 0.8, "def": 1.3},
-    "Gambia": {"rating": 72, "att": 0.9, "def": 1.3},
-    "Mozambico": {"rating": 69, "att": 0.8, "def": 1.5},
-    "Namibia": {"rating": 68, "att": 0.7, "def": 1.4},
-    "Tanzania": {"rating": 67, "att": 0.7, "def": 1.5},
-    "Guinea-Bissau": {"rating": 70, "att": 0.8, "def": 1.4},
-    "Equatoriale Guinea": {"rating": 74, "att": 1.1, "def": 1.2}
+# Database completo con TUTTE le 54 Nazionali UEFA della Nations League
+DATI_NAZIONALI = {
+    "Albania": {"rating": 74, "att": 1.1, "def": 1.1},
+    "Andorra": {"rating": 55, "att": 0.4, "def": 1.9},
+    "Armenia": {"rating": 67, "att": 1.0, "def": 1.6},
+    "Austria": {"rating": 80, "att": 1.6, "def": 1.1},
+    "Azerbaigian": {"rating": 63, "att": 0.7, "def": 1.7},
+    "Belgio": {"rating": 84, "att": 1.7, "def": 1.1},
+    "Bielorussia": {"rating": 64, "att": 0.7, "def": 1.3},
+    "Bosnia ed Erzegovina": {"rating": 73, "att": 1.1, "def": 1.4},
+    "Bulgaria": {"rating": 68, "att": 0.9, "def": 1.4},
+    "Cipro": {"rating": 62, "att": 0.7, "def": 1.8},
+    "Croazia": {"rating": 83, "att": 1.4, "def": 1.0},
+    "Danimarca": {"rating": 81, "att": 1.5, "def": 1.0},
+    "Estonia": {"rating": 63, "att": 0.7, "def": 1.7},
+    "Far Oer": {"rating": 61, "att": 0.7, "def": 1.5},
+    "Finlandia": {"rating": 72, "att": 1.0, "def": 1.4},
+    "Francia": {"rating": 92, "att": 2.2, "def": 0.8},
+    "Galles": {"rating": 76, "att": 1.2, "def": 1.2},
+    "Georgia": {"rating": 75, "att": 1.4, "def": 1.3},
+    "Germania": {"rating": 88, "att": 2.0, "def": 1.0},
+    "Gibilterra": {"rating": 50, "att": 0.3, "def": 2.3},
+    "Grecia": {"rating": 76, "att": 1.3, "def": 1.0},
+    "Inghilterra": {"rating": 90, "att": 2.1, "def": 0.8},
+    "Irlanda": {"rating": 73, "att": 1.0, "def": 1.3},
+    "Irlanda del Nord": {"rating": 70, "att": 1.0, "def": 1.2},
+    "Islanda": {"rating": 72, "att": 1.2, "def": 1.5},
+    "Israele": {"rating": 73, "att": 1.1, "def": 1.6},
+    "Italia": {"rating": 85, "att": 1.6, "def": 0.9},
+    "Kazakistan": {"rating": 68, "att": 0.9, "def": 1.6},
+    "Kosovo": {"rating": 70, "att": 1.2, "def": 1.3},
+    "Lettonia": {"rating": 62, "att": 0.8, "def": 1.6},
+    "Liechtenstein": {"rating": 49, "att": 0.3, "def": 2.3},
+    "Lituania": {"rating": 62, "att": 0.7, "def": 1.6},
+    "Lussemburgo": {"rating": 67, "att": 0.8, "def": 1.4},
+    "Macedonia del Nord": {"rating": 71, "att": 1.1, "def": 1.3},
+    "Malta": {"rating": 58, "att": 0.5, "def": 1.8},
+    "Moldavia": {"rating": 61, "att": 0.8, "def": 1.5},
+    "Montenegro": {"rating": 71, "att": 0.9, "def": 1.4},
+    "Norvegia": {"rating": 79, "att": 1.7, "def": 1.3},
+    "Olanda": {"rating": 86, "att": 1.9, "def": 1.1},
+    "Polonia": {"rating": 77, "att": 1.3, "def": 1.4},
+    "Portogallo": {"rating": 88, "att": 2.0, "def": 0.9},
+    "Repubblica Ceca": {"rating": 77, "att": 1.4, "def": 1.3},
+    "Romania": {"rating": 75, "att": 1.4, "def": 1.1},
+    "San Marino": {"rating": 48, "att": 0.3, "def": 2.4},
+    "Scozia": {"rating": 76, "att": 1.1, "def": 1.3},
+    "Serbia": {"rating": 78, "att": 1.3, "def": 1.3},
+    "Slovacchia": {"rating": 75, "att": 1.3, "def": 1.1},
+    "Slovenia": {"rating": 75, "att": 1.2, "def": 1.1},
+    "Spagna": {"rating": 91, "att": 2.1, "def": 0.8},
+    "Svezia": {"rating": 77, "att": 1.6, "def": 1.2},
+    "Svizzera": {"rating": 81, "att": 1.4, "def": 1.1},
+    "Turchia": {"rating": 79, "att": 1.6, "def": 1.2},
+    "Ucraina": {"rating": 78, "att": 1.4, "def": 1.2},
+    "Ungheria": {"rating": 77, "att": 1.2, "def": 1.2}
 }
 
-# Database Coppe Europee (Champions & Europa League)
+# Database Coppe Europee
 DATI_COPPE = {
     "Real Madrid": {"rating": 94, "att": 2.3, "def": 0.8},
     "Manchester City": {"rating": 94, "att": 2.4, "def": 0.8},
@@ -90,28 +120,25 @@ DATI_COPPE = {
     "Fenerbahce": {"rating": 81, "att": 1.6, "def": 1.1}
 }
 
-# Database Nazionali Europee
-DATI_NAZIONALI = {
-    "Francia": {"rating": 92, "att": 2.2, "def": 0.8},
-    "Spagna": {"rating": 91, "att": 2.1, "def": 0.8},
-    "Inghilterra": {"rating": 90, "att": 2.1, "def": 0.8},
-    "Germania": {"rating": 88, "att": 2.0, "def": 1.0},
-    "Portugal": {"rating": 88, "att": 2.0, "def": 0.9},
-    "Olanda": {"rating": 86, "att": 1.9, "def": 1.1},
-    "Italia": {"rating": 85, "att": 1.6, "def": 0.9},
-    "Belgio": {"rating": 84, "att": 1.7, "def": 1.1},
-    "Croazia": {"rating": 83, "att": 1.4, "def": 1.0},
-    "Svizzera": {"rating": 81, "att": 1.4, "def": 1.1},
-    "Danimarca": {"rating": 81, "att": 1.5, "def": 1.0},
-    "Serbia": {"rating": 78, "att": 1.3, "def": 1.3},
-    "Ungheria": {"rating": 77, "att": 1.2, "def": 1.2},
-    "Polonia": {"rating": 77, "att": 1.3, "def": 1.4},
-    "Scozia": {"rating": 76, "att": 1.1, "def": 1.3},
-    "Ucraina": {"rating": 78, "att": 1.4, "def": 1.2},
-    "Austria": {"rating": 80, "att": 1.6, "def": 1.1},
-    "Turchia": {"rating": 79, "att": 1.6, "def": 1.2},
-    "Norvegia": {"rating": 79, "att": 1.7, "def": 1.3},
-    "Svezia": {"rating": 77, "att": 1.6, "def": 1.2}
+# Database AFCON
+DATI_AFCON = {
+    "Costa d'Avorio": {"rating": 84, "att": 1.6, "def": 0.9},
+    "Nigeria": {"rating": 85, "att": 1.8, "def": 1.0},
+    "Marocco": {"rating": 87, "att": 1.9, "def": 0.7},
+    "Senegal": {"rating": 86, "att": 1.8, "def": 0.8},
+    "Egitto": {"rating": 83, "att": 1.5, "def": 0.9},
+    "Algeria": {"rating": 82, "att": 1.6, "def": 1.0},
+    "Camerun": {"rating": 81, "att": 1.4, "def": 1.0},
+    "Ghana": {"rating": 78, "att": 1.3, "def": 1.2},
+    "Mali": {"rating": 79, "att": 1.3, "def": 0.9},
+    "Sudafrica": {"rating": 77, "att": 1.2, "def": 1.0},
+    "Tunisia": {"rating": 79, "att": 1.2, "def": 0.9},
+    "RD del Congo": {"rating": 77, "att": 1.2, "def": 1.1},
+    "Burkina Faso": {"rating": 76, "att": 1.2, "def": 1.1},
+    "Guinea": {"rating": 76, "att": 1.2, "def": 1.1},
+    "Capo Verde": {"rating": 75, "att": 1.1, "def": 1.0},
+    "Angola": {"rating": 74, "att": 1.1, "def": 1.1},
+    "Zambia": {"rating": 73, "att": 1.0, "def": 1.3}
 }
 
 @st.cache_data(ttl=3600)
@@ -150,32 +177,27 @@ if tipo_comp == "club":
 elif tipo_comp == "afcon":
     squadre = sorted(list(DATI_AFCON.keys()))
     st.sidebar.header("🌍 Coppa d'Africa - Partita")
-    s_casa = st.sidebar.selectbox("Nazionale Casa / Designata", squadre, index=squadre.index("Marocco") if "Marocco" in squadre else 0)
-    s_ospite = st.sidebar.selectbox("Nazionale Trasferta", squadre, index=squadre.index("Nigeria") if "Nigeria" in squadre else 1)
-    
+    s_casa = st.sidebar.selectbox("Nazionale Casa / Designata", squadre, index=0)
+    s_ospite = st.sidebar.selectbox("Nazionale Trasferta", squadre, index=min(1, len(squadre)-1))
     campo_neutro = st.sidebar.checkbox("Campo Neutro (Torneo Finale)", value=True)
     
     d_casa = DATI_AFCON[s_casa]
     d_ospite = DATI_AFCON[s_ospite]
-    
     diff_rating = d_casa["rating"] - d_ospite["rating"]
     bonus_campo = 0.20 if not campo_neutro else 0.0
     
-    # La Coppa d'Africa ha medie gol storicamente un po' più basse
     lambda_casa = max(0.2, ((d_casa["att"] + d_ospite["def"]) / 2.0 + (diff_rating * 0.02) + bonus_campo) * 0.9)
     lambda_ospite = max(0.2, ((d_ospite["att"] + d_casa["def"]) / 2.0 - (diff_rating * 0.02)) * 0.9)
 
 elif tipo_comp == "coppe":
     squadre = sorted(list(DATI_COPPE.keys()))
     st.sidebar.header("🏆 Coppe Europee - Partita")
-    s_casa = st.sidebar.selectbox("Squadra in Casa", squadre, index=squadre.index("Real Madrid") if "Real Madrid" in squadre else 0)
-    s_ospite = st.sidebar.selectbox("Squadra in Trasferta", squadre, index=squadre.index("Inter") if "Inter" in squadre else 1)
-    
+    s_casa = st.sidebar.selectbox("Squadra in Casa", squadre, index=0)
+    s_ospite = st.sidebar.selectbox("Squadra in Trasferta", squadre, index=min(1, len(squadre)-1))
     campo_neutro = st.sidebar.checkbox("Campo Neutro (es. Finale)", value=False)
     
     d_casa = DATI_COPPE[s_casa]
     d_ospite = DATI_COPPE[s_ospite]
-    
     diff_rating = d_casa["rating"] - d_ospite["rating"]
     bonus_campo = 0.25 if not campo_neutro else 0.0
     
@@ -185,14 +207,12 @@ elif tipo_comp == "coppe":
 else:
     squadre = sorted(list(DATI_NAZIONALI.keys()))
     st.sidebar.header("🌍 Nations League - Partita")
-    s_casa = st.sidebar.selectbox("Nazionale in Casa", squadre, index=squadre.index("Italia") if "Italia" in squadre else 0)
-    s_ospite = st.sidebar.selectbox("Nazionale in Trasferta", squadre, index=squadre.index("Francia") if "Francia" in squadre else 1)
-    
+    s_casa = st.sidebar.selectbox("Nazionale in Casa", squadre, index=squadre.index("Armenia") if "Armenia" in squadre else 0)
+    s_ospite = st.sidebar.selectbox("Nazionale in Trasferta", squadre, index=squadre.index("Montenegro") if "Montenegro" in squadre else 1)
     campo_neutro = st.sidebar.checkbox("Campo Neutro / Fase Finale", value=False)
     
     d_casa = DATI_NAZIONALI[s_casa]
     d_ospite = DATI_NAZIONALI[s_ospite]
-    
     diff_rating = d_casa["rating"] - d_ospite["rating"]
     bonus_campo = 0.22 if not campo_neutro else 0.0
     
@@ -207,7 +227,7 @@ media_ospite = st.sidebar.number_input(f"Media Gol {s_ospite}", value=float(roun
 def poisson_pmf(k, mu):
     return (mu**k * math.exp(-mu)) / math.factorial(k)
 
-# Matrice Gol (da 0-0 a 7-7)
+# Matrice Gol
 matrice = np.zeros((8, 8))
 for i in range(8):
     for j in range(8):
@@ -323,4 +343,3 @@ for i in range(6):
 
 df_res = pd.DataFrame(risultati).sort_values(by="Probabilità", ascending=False).head(5)
 st.dataframe(df_res, use_container_width=True, hide_index=True)
-    
